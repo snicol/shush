@@ -27,7 +27,7 @@ jobs:
         go get -v -t -d ./...
     
     - name: build OSX amd64
-      run: go build -o /tmp/shush-osx-amd64 -v ./cmd
+      run: go build -o shush-osx-amd64 -v ./cmd
 
     - name: test
       run: go test -v ./...
@@ -35,4 +35,4 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: shush-osx-amd64
-        path: /tmp/shush-osx-amd64
+        path: shush-osx-amd64
