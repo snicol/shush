@@ -1,0 +1,46 @@
+name: Go
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: set up Go 1.14
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.14
+      id: go
+
+    - name: check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: get dependencies
+      run: |
+        go get -v -t -d ./...
+
+    - name: build linux amd64
+      run: GOOS=linux GOARCH=amd64 go build -v ./cmd -o /tmp/shush-linux-amd64
+    
+    - name: build OSX amd64
+      run: GOOS=darwin GOARCH=amd64 go build -v ./cmd -o /tmp/shush-osx-amd64
+
+    - name: test
+      run: go test -v .
+    
+    - uses: actions/upload-artifact@v2
+      with:
+        name: shush-linux-amd64
+        path: /tmp/shush-linux-amd64
+        
+    - uses: actions/upload-artifact@v2
+      with:
+        name: shush-osx-amd64
+        path: /tmp/shush-osx-amd64
