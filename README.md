@@ -1,6 +1,6 @@
 # shush
 
-Shush is a secrets manager which allows writing and syncronisation between
+Shush is a secret manager which allows writing and syncronisation between
 providers. It is similar to rclone in that it is designed to work with a number
 of backends. The project is split into two distinct areas, `storage` providers
 and `cache` providers. It also provides a Go helper to load in secrets to a
@@ -27,17 +27,17 @@ for AWS PMS+KMS and Keychain cache:
 ```yaml
 default:
   storage:
-	type: pmskms
-	config:
-	  keyId: 0a000000-0000-0000-0000-000000000000 # your KMS key ID
-	  awsProfile: my_aws_profile
-	  awsRegion: eu-west-1
+    type: pmskms
+    config:
+      keyId: 0a000000-0000-0000-0000-000000000000 # your KMS key ID
+      awsProfile: my_aws_profile
+      awsRegion: eu-west-1
   cache:
-	type: keychain
-	config:
-	  securityClass: internet
-	  service: my-app
-	  accessGroup: com.my-app.secrets
+    type: keychain
+    config:
+      securityClass: internet
+      service: my-app
+      accessGroup: com.my-app.secrets
 ```
 
 You can specify additional profiles and use them at runtime using
