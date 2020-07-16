@@ -30,7 +30,7 @@ jobs:
       run: go build -o /tmp/shush-osx-amd64 -v ./cmd
 
     - name: test
-      run: go test -v .
+      run: go test -v ./...
         
     - uses: actions/upload-artifact@v2
       with:
