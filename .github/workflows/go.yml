@@ -10,7 +10,7 @@ jobs:
 
   build:
     name: build
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
 
     - name: set up Go 1.14
@@ -27,7 +27,7 @@ jobs:
         go get -v -t -d ./...
     
     - name: build OSX amd64
-      run: GOOS=darwin GOARCH=amd64 go build -o /tmp/shush-osx-amd64 -v ./cmd
+      run: go build -o /tmp/shush-osx-amd64 -v ./cmd
 
     - name: test
       run: go test -v .
