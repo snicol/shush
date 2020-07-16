@@ -25,20 +25,12 @@ jobs:
     - name: get dependencies
       run: |
         go get -v -t -d ./...
-
-    - name: build linux amd64
-      run: GOOS=linux GOARCH=amd64 go build -v ./cmd -o /tmp/shush-linux-amd64
     
     - name: build OSX amd64
-      run: GOOS=darwin GOARCH=amd64 go build -v ./cmd -o /tmp/shush-osx-amd64
+      run: GOOS=darwin GOARCH=amd64 go build -o /tmp/shush-osx-amd64 -v ./cmd
 
     - name: test
       run: go test -v .
-    
-    - uses: actions/upload-artifact@v2
-      with:
-        name: shush-linux-amd64
-        path: /tmp/shush-linux-amd64
         
     - uses: actions/upload-artifact@v2
       with:
