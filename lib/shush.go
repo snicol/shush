@@ -17,6 +17,10 @@ const (
 	UpsertVersionReplaceDifferent UpsertVersionBehaviour = iota
 	// UpsertVersionReplaceNewer only if the latest version is newer will it replace
 	UpsertVersionReplaceNewer
+	// UpsertVersionSkipCheck ensures that checks for the latest version on the
+	// storage provider skipped entirely. Useful for users relying on the
+	// sync command
+	UpsertVersionSkipCheck
 )
 
 type Session struct {
@@ -72,6 +76,10 @@ func (s *Session) getCache(ctx context.Context, key string) (string, int, bool, 
 		return "", 0, false, err
 	}
 
+	if s.upsertBehaviour == UpsertVersionSkipCheck {
+		return cacheVal, cacheVer, true, nil
+	}
+
 	latestLiveVersion, err := s.storage.LatestVersion(ctx, key)
 	if err != nil {
 		return "", 0, false, err
@@ -98,4 +106,38 @@ func (s *Session) setCache(ctx context.Context, version int, k, v string) error 
 	}
 
 	return s.cache.Set(version, k, v)
+}
+
+func (s *Session) Sync(ctx context.Context, prefixes []string) error {
+	syncStorage, ok := s.storage.(storage.SyncableProvider)
+	if !ok {
+		return errors.New("sync is not implemented on this storage type")
+	}
+
+	if s.cache == nil {
+		return errors.New("sync called with no cache provider")
+	}
+
+	for _, prefix := range prefixes {
+		keys, err := syncStorage.GetByPrefix(ctx, prefix)
+		if err != nil {
+			return err
+		}
+
+		if len(keys) == 0 {
+			continue
+		}
+
+		// TODO(sn): look into making caches match the same interface as
+		// storage for Get, so that session.Get and this loop can be
+		// simplified
+		for _, key := range keys {
+			_, _, err = s.Get(ctx, key)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

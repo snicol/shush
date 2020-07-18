@@ -38,6 +38,12 @@ default:
       securityClass: internet
       service: my-app
       accessGroup: com.my-app.secrets
+  sync:
+    prefixes:
+      - dev
+      - production
+      - qa
+      - infra
 ```
 
 You can specify additional profiles and use them at runtime using
@@ -52,6 +58,10 @@ To set a secret:
 To get a secret:
 
 	shush get <key>
+
+To sync secrets from the storage provider to the cache:
+
+	shush sync
 
 ## Programmatic examples
 
