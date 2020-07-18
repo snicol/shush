@@ -9,7 +9,7 @@ import (
 )
 
 // UpsertVersionBehaviour allows control over what happens when a newer version
-// in the storage provider is
+// in the storage provider is found.
 type UpsertVersionBehaviour int
 
 const (
