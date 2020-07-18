@@ -20,37 +20,28 @@ const (
 )
 
 type Session struct {
-	cache   cache.Provider
 	storage storage.Provider
+	cache   cache.Provider
 
 	upsertBehaviour UpsertVersionBehaviour
 }
 
-func NewSession(cache cache.Provider, storage storage.Provider, upsertBehaviour UpsertVersionBehaviour) *Session {
+func NewSession(storage storage.Provider, cache cache.Provider, upsertBehaviour UpsertVersionBehaviour) *Session {
 	return &Session{
-		cache:           cache,
 		storage:         storage,
+		cache:           cache,
 		upsertBehaviour: upsertBehaviour,
 	}
 }
 
 func (s *Session) Get(ctx context.Context, key string) (val string, ver int, err error) {
-	cacheVal, cacheVer, err := s.cache.Get(key)
-	if err != nil && err != cache.ErrNotFound {
-		return "", 0, err
-	}
-
-	latestLiveVersion, err := s.storage.LatestVersion(ctx, key)
+	val, ver, found, err := s.getCache(ctx, key)
 	if err != nil {
 		return "", 0, err
 	}
 
-	if latestLiveVersion == cacheVer {
-		return cacheVal, cacheVer, nil
-	}
-
-	if s.upsertBehaviour == UpsertVersionReplaceNewer && latestLiveVersion <= cacheVer {
-		return cacheVal, cacheVer, nil
+	if found {
+		return val, ver, nil
 	}
 
 	vs, err := s.storage.Get(ctx, []string{key})
@@ -64,14 +55,47 @@ func (s *Session) Get(ctx context.Context, key string) (val string, ver int, err
 
 	liveVal, liveVer := vs[0].Value, vs[0].Version
 
-	err = s.cache.Set(liveVer, key, liveVal)
-	if err != nil {
+	if err := s.setCache(ctx, liveVer, key, liveVal); err != nil {
 		return "", 0, err
 	}
 
 	return liveVal, liveVer, nil
 }
 
+func (s *Session) getCache(ctx context.Context, key string) (string, int, bool, error) {
+	if s.cache == nil {
+		return "", 0, false, nil
+	}
+
+	cacheVal, cacheVer, err := s.cache.Get(key)
+	if err != nil && err != cache.ErrNotFound {
+		return "", 0, false, err
+	}
+
+	latestLiveVersion, err := s.storage.LatestVersion(ctx, key)
+	if err != nil {
+		return "", 0, false, err
+	}
+
+	if latestLiveVersion == cacheVer {
+		return cacheVal, cacheVer, true, nil
+	}
+
+	if s.upsertBehaviour == UpsertVersionReplaceNewer && latestLiveVersion <= cacheVer {
+		return cacheVal, cacheVer, true, nil
+	}
+
+	return "", 0, false, nil
+}
+
 func (s *Session) Set(ctx context.Context, key, value string) error {
 	return s.storage.Set(ctx, key, value)
+}
+
+func (s *Session) setCache(ctx context.Context, version int, k, v string) error {
+	if s.cache == nil {
+		return nil
+	}
+
+	return s.cache.Set(version, k, v)
 }

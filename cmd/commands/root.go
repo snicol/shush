@@ -43,39 +43,10 @@ func Execute() {
 		panic(fmt.Errorf("unmarshal config file failed: %s", err))
 	}
 
-	var storageProvider storage.Provider
+	storageProvider := getStorageProvider(conf.Storage)
+	cacheProvider := getCacheProvider(conf.Cache)
 
-	switch conf.Storage.Type {
-	case "pmskms":
-		sess, err := session.NewSessionWithOptions(session.Options{
-			Profile:                 conf.Storage.Config.AWSProfile,
-			AssumeRoleTokenProvider: stscreds.StdinTokenProvider,
-			SharedConfigState:       session.SharedConfigEnable,
-		})
-		if err != nil {
-			panic(err)
-		}
-
-		storageProvider = storage.NewPMSKMS(sess, conf.Storage.Config.KeyID)
-	default:
-		panic(fmt.Sprintf("unknown storage provider type %s", conf.Storage.Type))
-	}
-
-	var cacheProvider cache.Provider
-
-	switch conf.Cache.Type {
-	case "keychain":
-		secClass := keychain.SecClassGenericPassword
-		if conf.Cache.Config.SecClass == "internet" {
-			secClass = keychain.SecClassInternetPassword
-		}
-
-		cacheProvider = cache.NewKeychain(secClass, conf.Cache.Config.Service, conf.Cache.Config.AccessGroup)
-	default:
-		panic(fmt.Errorf("unknown cache provider type %s", conf.Cache.Type))
-	}
-
-	sess = shush.NewSession(cacheProvider, storageProvider, shush.UpsertVersionReplaceNewer)
+	sess = shush.NewSession(storageProvider, cacheProvider, shush.UpsertVersionReplaceNewer)
 
 	rootCmd.AddCommand(getCmd)
 	rootCmd.AddCommand(setCmd)
@@ -83,5 +54,41 @@ func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
+	}
+}
+
+func getStorageProvider(storageConf StorageConfig) storage.Provider {
+	switch storageConf.Type {
+	case "pmskms":
+		sess, err := session.NewSessionWithOptions(session.Options{
+			Profile:                 storageConf.Config.AWSProfile,
+			AssumeRoleTokenProvider: stscreds.StdinTokenProvider,
+			SharedConfigState:       session.SharedConfigEnable,
+		})
+		if err != nil {
+			panic(err)
+		}
+
+		return storage.NewPMSKMS(sess, storageConf.Config.KeyID)
+	default:
+		panic(fmt.Sprintf("unknown storage provider type %s", storageConf.Type))
+	}
+}
+
+func getCacheProvider(cacheConf *CacheConfig) cache.Provider {
+	if cacheConf == nil {
+		return nil
+	}
+
+	switch cacheConf.Type {
+	case "keychain":
+		secClass := keychain.SecClassGenericPassword
+		if cacheConf.Config.SecClass == "internet" {
+			secClass = keychain.SecClassInternetPassword
+		}
+
+		return cache.NewKeychain(secClass, cacheConf.Config.Service, cacheConf.Config.AccessGroup)
+	default:
+		panic(fmt.Errorf("unknown cache provider type %s", cacheConf.Type))
 	}
 }

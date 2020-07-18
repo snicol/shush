@@ -70,7 +70,7 @@ func main() {
 	cacheProvider := cache.NewKeychain(keychain.SecClassGenericPassword, "example-app", "com.example-app.secrets")
 
 	// create a new shush session
-	ssh := shush.NewSession(cacheProvider, storageProvider, shush.UpsertVersionReplaceDifferent)
+	ssh := shush.NewSession(storageProvider, cacheProvider, shush.UpsertVersionReplaceDifferent)
 
 	// unmarshal your config
 	conf := MyConfig{}
@@ -102,7 +102,7 @@ func main() {
 	cacheProvider := cache.NewKeychain(keychain.SecClassGenericPassword, "example-app", "com.example-app.secrets")
 
 	// create a new shush session
-	ssh := shush.NewSession(cacheProvider, storageProvider, shush.UpsertVersionReplaceDifferent)
+	ssh := shush.NewSession(storageProvider, cacheProvider, shush.UpsertVersionReplaceDifferent)
 
 	mySecret, err := ssh.GetenvContext(ctx, "MY_SECRET")
 	if err != nil {
