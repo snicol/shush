@@ -17,6 +17,10 @@ const (
 	UpsertVersionReplaceDifferent UpsertVersionBehaviour = iota
 	// UpsertVersionReplaceNewer only if the latest version is newer will it replace
 	UpsertVersionReplaceNewer
+	// UpsertVersionSkipCheck ensures that checks for the latest version on the
+	// storage provider skipped entirely. Useful for users relying on the
+	// sync command
+	UpsertVersionSkipCheck
 )
 
 type Session struct {
@@ -70,6 +74,10 @@ func (s *Session) getCache(ctx context.Context, key string) (string, int, bool, 
 	cacheVal, cacheVer, err := s.cache.Get(key)
 	if err != nil && err != cache.ErrNotFound {
 		return "", 0, false, err
+	}
+
+	if s.upsertBehaviour == UpsertVersionSkipCheck {
+		return cacheVal, cacheVer, true, nil
 	}
 
 	latestLiveVersion, err := s.storage.LatestVersion(ctx, key)
