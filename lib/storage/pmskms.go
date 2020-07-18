@@ -8,8 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ssm"
 )
 
-// PMSKMS implements storage.Provider and uses AWS Parameter Store and
-// AWS KMS to store secrets.
+// PMSKMS implements storage.Provider and storage.SyncableProvider and uses
+// AWS Parameter Store and AWS KMS to store secrets.
 type PMSKMS struct {
 	svc   *ssm.SSM
 	keyID string
@@ -69,4 +69,36 @@ func (s *PMSKMS) LatestVersion(ctx context.Context, key string) (int, error) {
 	}
 
 	return int(*res.Parameter.Version), nil
+}
+
+func (s *PMSKMS) GetByPrefix(ctx context.Context, prefix string) (keys []string, err error) {
+	return keys, s.describeParamsPaginator(ctx, prefix, nil, &keys)
+}
+
+func (s *PMSKMS) describeParamsPaginator(ctx context.Context, prefix string, token *string, rs *[]string) error {
+	res, err := s.svc.DescribeParametersWithContext(ctx, &ssm.DescribeParametersInput{
+		NextToken: token,
+		ParameterFilters: []*ssm.ParameterStringFilter{
+			{
+				Key:    aws.String("Name"),
+				Option: aws.String("BeginsWith"),
+				Values: []*string{
+					aws.String(prefix),
+				},
+			},
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	for _, v := range res.Parameters {
+		*rs = append(*rs, *v.Name)
+	}
+
+	if res.NextToken == nil || len(res.Parameters) == 0 {
+		return nil
+	}
+
+	return s.describeParamsPaginator(ctx, prefix, res.NextToken, rs)
 }
