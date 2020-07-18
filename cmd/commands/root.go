@@ -18,6 +18,9 @@ import (
 var (
 	sess *shush.Session
 
+	profile string
+	conf    Config
+
 	rootCmd = &cobra.Command{
 		Use:   "shush",
 		Short: "Shush is an AWS secret manager tool. See `shush --help`.",
@@ -25,7 +28,6 @@ var (
 )
 
 func Execute() {
-	var profile string
 	rootCmd.PersistentFlags().StringVarP(&profile, "profile", "p", "default", "Config profile to use")
 
 	viper.SetConfigName("config")
@@ -37,7 +39,6 @@ func Execute() {
 		panic(fmt.Errorf("Fatal error config file: %s", err))
 	}
 
-	var conf Config
 	err = viper.UnmarshalKey(profile, &conf)
 	if err != nil {
 		panic(fmt.Errorf("unmarshal config file failed: %s", err))
@@ -50,6 +51,7 @@ func Execute() {
 
 	rootCmd.AddCommand(getCmd)
 	rootCmd.AddCommand(setCmd)
+	rootCmd.AddCommand(syncCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

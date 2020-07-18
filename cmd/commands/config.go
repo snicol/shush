@@ -3,6 +3,7 @@ package commands
 type Config struct {
 	Storage StorageConfig `mapstructure:"storage"`
 	Cache   *CacheConfig  `mapstructure:"cache"`
+	Sync    *SyncConfig   `mapstructure:"sync"`
 }
 
 type StorageConfig struct {
@@ -17,6 +18,10 @@ type CacheConfig struct {
 	Config struct {
 		KeybaseConfig `mapstructure:",squash"`
 	} `mapstructure:"config"`
+}
+
+type SyncConfig struct {
+	Prefixes []string `mapstructure:"prefixes"`
 }
 
 type PMSKMSConfig struct {
