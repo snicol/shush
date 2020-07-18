@@ -2,7 +2,7 @@ package commands
 
 type Config struct {
 	Storage StorageConfig `mapstructure:"storage"`
-	Cache   CacheConfig   `mapstructure:"cache"`
+	Cache   *CacheConfig  `mapstructure:"cache"`
 }
 
 type StorageConfig struct {
