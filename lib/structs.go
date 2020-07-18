@@ -40,7 +40,7 @@ func (s *Session) UnmarshalContext(ctx context.Context, o interface{}) error {
 		}
 
 		if !fv.CanSet() {
-			return fmt.Errorf("cannot set capstone value at field %s", f.Name)
+			return fmt.Errorf("cannot set value at field %s", f.Name)
 		}
 
 		value, _, err := s.Get(ctx, tag)
