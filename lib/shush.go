@@ -14,9 +14,9 @@ type UpsertVersionBehaviour int
 
 const (
 	// UpsertVersionReplaceDifferent if the version is different, it will be replaced
-	UpsertVersionReplaceDifferent UpsertVersionBehaviour = 0
+	UpsertVersionReplaceDifferent UpsertVersionBehaviour = iota
 	// UpsertVersionReplaceNewer only if the latest version is newer will it replace
-	UpsertVersionReplaceNewer = 1
+	UpsertVersionReplaceNewer
 )
 
 type Session struct {
