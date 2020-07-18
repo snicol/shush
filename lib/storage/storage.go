@@ -10,6 +10,11 @@ type Provider interface {
 	LatestVersion(ctx context.Context, key string) (int, error)
 }
 
+type SyncableProvider interface {
+	Provider
+	GetByPrefix(ctx context.Context, prefix string) ([]string, error)
+}
+
 type Result struct {
 	Value   string
 	Version int
