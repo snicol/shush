@@ -1,7 +1,9 @@
 package main
 
-import cmd "shush/cmd/commands"
+import (
+	"shush/cmd/commands"
+)
 
 func main() {
-	cmd.Execute()
+	commands.Execute()
 }
