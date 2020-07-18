@@ -46,7 +46,7 @@ func TestUnmarshal(t *testing.T) {
 	storageProvider := storage.NewPMSKMS(sess, "5ab872f6-b721-41f6-9c1a-9aa699212ea4")
 	cacheProvider := cache.NewKeychain(keychain.SecClassGenericPassword, "example-app", "com.example-app.secrets")
 
-	ssh := shush.NewSession(cacheProvider, storageProvider, shush.UpsertVersionReplaceDifferent)
+	ssh := shush.NewSession(storageProvider, cacheProvider, shush.UpsertVersionReplaceDifferent)
 
 	ex := Example{}
 
@@ -65,7 +65,7 @@ func TestEnv(t *testing.T) {
 	storageProvider := storage.NewPMSKMS(sess, "5ab872f6-b721-41f6-9c1a-9aa699212ea4")
 	cacheProvider := cache.NewKeychain(keychain.SecClassGenericPassword, "example-app", "com.example-app.secrets")
 
-	ssh := shush.NewSession(cacheProvider, storageProvider, shush.UpsertVersionReplaceDifferent)
+	ssh := shush.NewSession(storageProvider, cacheProvider, shush.UpsertVersionReplaceDifferent)
 
 	_, err := ssh.GetenvContext(ctx, k)
 	if err != nil {
