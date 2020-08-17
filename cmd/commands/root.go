@@ -61,8 +61,6 @@ func initConfig() {
 	storageProvider := getStorageProvider(conf.Storage)
 	cacheProvider := getCacheProvider(conf.Cache)
 
-	log.Println(cacheProvider)
-
 	sess = shush.NewSession(storageProvider, cacheProvider, shush.UpsertVersionReplaceNewer)
 }
 
@@ -86,6 +84,10 @@ func getStorageProvider(storageConf StorageConfig) storage.Provider {
 		}
 
 		return storage.NewPMSKMS(sess, storageConf.Config.KeyID)
+
+	case "jsongit":
+		return storage.NewJSONGit(storageConf.Config.Path, storageConf.Config.Filename,
+			storageConf.Config.RemoteName, storageConf.Config.Indent)
 	default:
 		log.Fatal(fmt.Sprintf("unknown storage provider type %s", storageConf.Type))
 		return nil

@@ -9,14 +9,15 @@ type Config struct {
 type StorageConfig struct {
 	Type   string `mapstructure:"type"`
 	Config struct {
-		PMSKMSConfig `mapstructure:",squash"`
+		PMSKMSConfig  `mapstructure:",squash"`
+		JSONGitConfig `mapstructure:",squash"`
 	} `mapstructure:"config"`
 }
 
 type CacheConfig struct {
 	Type   string `mapstructure:"type"`
 	Config struct {
-		KeybaseConfig `mapstructure:",squash"`
+		KeychainConfig `mapstructure:",squash"`
 	} `mapstructure:"config"`
 }
 
@@ -30,7 +31,14 @@ type PMSKMSConfig struct {
 	AWSRegion  string `mapstructure:"awsRegion"`
 }
 
-type KeybaseConfig struct {
+type JSONGitConfig struct {
+	Path       string `mapstruture:"path"`
+	Filename   string `mapstructure:"filename"`
+	RemoteName string `mapstructure:"remoteName"`
+	Indent     string `mapstructure:"indent"`
+}
+
+type KeychainConfig struct {
 	SecClass    string `mapstructure:"secClass"`
 	Service     string `mapstructure:"service"`
 	AccessGroup string `mapstructure:"accessGroup"`
