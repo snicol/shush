@@ -72,3 +72,25 @@ func TestEnv(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestGitStore(t *testing.T) {
+	t.Skip("skipping integration test")
+
+	storageProvider := storage.NewJSONGit("/Users/snicol/Projects/secret-store-test", "nonprod.json", "origin", "	")
+
+	ssh := shush.NewSession(storageProvider, nil, shush.UpsertVersionReplaceDifferent)
+
+	k := "my.test.secret.path"
+
+	err := ssh.Set(ctx, k, "test-secret")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	val, ver, err := ssh.Get(ctx, k)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	log.Println(val, ver)
+}
