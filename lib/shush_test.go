@@ -23,7 +23,7 @@ var (
 )
 
 func init() {
-	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
 
 	var err error
 	sess, err = session.NewSessionWithOptions(session.Options{
@@ -71,4 +71,26 @@ func TestEnv(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestGitStore(t *testing.T) {
+	t.Skip("skipping integration test")
+
+	storageProvider := storage.NewJSONGit("/Users/snicol/Projects/secret-store-test", "nonprod.json", "origin", "	")
+
+	ssh := shush.NewSession(storageProvider, nil, shush.UpsertVersionReplaceDifferent)
+
+	k := "my.test.secret.path"
+
+	err := ssh.Set(ctx, k, "test-secret")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	val, ver, err := ssh.Get(ctx, k)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	log.Println(val, ver)
 }
